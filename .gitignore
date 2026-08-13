@@ -1,0 +1,10 @@
+node_modules/
+*.log
+
+# Local environment configuration (never commit real secrets)
+.env
+
+# SQLite database files (runtime data — do not commit responses)
+data/*.db
+data/*.db-shm
+data/*.db-wal

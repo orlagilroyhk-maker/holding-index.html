@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6c4bf4" />
+  <title>Admin — Do You Do This Too?</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%99%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="admin">
+  <main class="wrap admin-wrap">
+    <header class="admin-head">
+      <div>
+        <span class="badge">Admin</span>
+        <h1>Do You Do This Too?</h1>
+      </div>
+      <a class="btn ghost" href="/">View questionnaire →</a>
+    </header>
+
+    <!-- Overview -->
+    <section class="panel">
+      <h2>Overview</h2>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-cap">Completed</div></div>
+        <div class="stat"><div class="stat-num" id="stat-avg">—</div><div class="stat-cap">Avg same-brain</div></div>
+        <div class="stat"><div class="stat-num" id="stat-questions">—</div><div class="stat-cap">Active questions</div></div>
+      </div>
+      <h3 class="sub">Distribution of same-brain scores</h3>
+      <div class="dist" id="dist"></div>
+    </section>
+
+    <!-- Per-question results -->
+    <section class="panel">
+      <h2>Results by question</h2>
+      <div id="results-list" class="results-list"></div>
+    </section>
+
+    <!-- Manage questions -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Manage questions</h2>
+        <button class="btn secondary small" id="add-btn">+ Add question</button>
+      </div>
+      <p class="subtle">Drag isn’t needed — use the ↑ ↓ buttons to reorder. Changes save immediately.</p>
+      <div id="manage-list" class="manage-list"></div>
+    </section>
+  </main>
+
+  <!-- Edit dialog -->
+  <dialog id="edit-dialog">
+    <form method="dialog" id="edit-form">
+      <h2 id="edit-title">Edit question</h2>
+      <label>ID <small>(short, unique, no spaces — used as a key)</small>
+        <input name="id" id="f-id" required pattern="[A-Za-z0-9_-]+" />
+      </label>
+      <label>Question title
+        <input name="title" id="f-title" required />
+      </label>
+      <div class="two">
+        <label>Answer A <input name="answerA" id="f-answerA" required /></label>
+        <label>Answer B <input name="answerB" id="f-answerB" required /></label>
+      </div>
+      <label>Image URL <small>(optional)</small>
+        <input name="image" id="f-image" placeholder="https://…" />
+      </label>
+      <label>Video URL <small>(optional — YouTube/Vimeo/embed or direct .mp4)</small>
+        <input name="video" id="f-video" placeholder="https://…" />
+      </label>
+      <div class="two">
+        <label>Your answer (creator)
+          <select name="creatorAnswer" id="f-creator">
+            <option value="">— none —</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+          </select>
+        </label>
+        <label>Enabled
+          <select name="enabled" id="f-enabled">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" type="submit">Cancel</button>
+        <button class="btn small" value="save" id="save-btn" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/admin.js"></script>
+</body>
+</html>

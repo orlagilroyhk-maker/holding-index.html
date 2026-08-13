@@ -1,0 +1,60 @@
+{
+  "_comment": "Sample questionnaire content. Edit this file to change the questions used to SEED the database on first run. After the first run, questions live in the database and are edited from the /admin page. To re-seed from this file, stop the app, delete data/responses.db, and start again. 'creatorAnswer' is your own answer (\"A\" or \"B\") and is never sent to respondents' browsers. Media (image/video) is optional — leave as empty strings for none. There is no built-in meaning to A vs B; sides can be reordered freely without affecting scoring.",
+  "questions": [
+    {
+      "id": "tv-watching",
+      "title": "When you watch TV or a film",
+      "answerA": "I give it my full attention and just watch",
+      "answerB": "I usually have my phone or something else on the go too",
+      "image": "",
+      "video": "",
+      "creatorAnswer": "B",
+      "enabled": true,
+      "displayOrder": 1
+    },
+    {
+      "id": "making-tea",
+      "title": "Making a cup of tea or coffee",
+      "answerA": "I make it and drink it while it's hot",
+      "answerB": "I make it, get distracted, and find it stone cold later",
+      "image": "",
+      "video": "",
+      "creatorAnswer": "B",
+      "enabled": true,
+      "displayOrder": 2
+    },
+    {
+      "id": "getting-ready",
+      "title": "Getting ready to leave the house",
+      "answerA": "I get ready in a steady order, one thing at a time",
+      "answerB": "I start five things at once and hope they all finish",
+      "image": "",
+      "video": "",
+      "creatorAnswer": "A",
+      "enabled": true,
+      "displayOrder": 3
+    },
+    {
+      "id": "shopping-list",
+      "title": "Doing the food shop",
+      "answerA": "I follow a list, aisle by aisle",
+      "answerB": "I wander and grab whatever catches my eye",
+      "image": "",
+      "video": "",
+      "creatorAnswer": "A",
+      "enabled": true,
+      "displayOrder": 4
+    },
+    {
+      "id": "reading-book",
+      "title": "Reading a book",
+      "answerA": "I read one book from start to finish",
+      "answerB": "I've got three or four on the go at once",
+      "image": "",
+      "video": "",
+      "creatorAnswer": "B",
+      "enabled": true,
+      "displayOrder": 5
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6c4bf4" />
+  <meta name="description" content="A fun A/B comparison of everyday habits. Not a medical or diagnostic tool." />
+  <title>Do You Do This Too?</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%9D%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <main class="wrap">
+
+    <!-- ===== Intro ===== -->
+    <section id="screen-intro" class="screen intro active" aria-labelledby="intro-title">
+      <span class="badge">Just for fun</span>
+      <h1 id="intro-title">Do You Do This Too?</h1>
+      <p class="lead">
+        I keep seeing videos showing two completely different ways people apparently do
+        ordinary everyday things — and I keep thinking, hang on… doesn’t everybody do that?
+      </p>
+      <p class="lead">So I’m curious.</p>
+      <p class="lead">
+        For each question, choose whichever answer is most like you.
+        There are no right or wrong answers.
+      </p>
+      <div class="disclaimer">
+        This is <strong>not</strong> an ADHD test, screening tool or diagnostic questionnaire.
+        It is simply a fun comparison of everyday habits, attention and ways of doing things.
+      </div>
+      <div class="intro-actions">
+        <button class="btn" id="start-btn">Start</button>
+      </div>
+      <nav class="footer-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/admin">Admin</a>
+      </nav>
+    </section>
+
+    <!-- ===== Question ===== -->
+    <section id="screen-question" class="screen" aria-labelledby="q-title">
+      <div class="topbar">
+        <button class="back" id="back-btn" aria-label="Go back to the previous question">←</button>
+        <div class="progress-meta">
+          <div class="progress-count" id="progress-count" aria-live="polite">Question 1 of 5</div>
+          <div class="progress-track" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question">
+        <h2 class="q-title" id="q-title">…</h2>
+        <div class="media" id="q-media"></div>
+        <div class="cards" id="q-cards" role="group" aria-label="Choose an answer">
+          <!-- answer cards injected here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Results ===== -->
+    <section id="screen-results" class="screen results" aria-labelledby="results-title">
+      <h1 id="results-title" class="visually-hidden">Your result</h1>
+
+      <div class="score-ring" role="img" aria-label="">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="track" cx="60" cy="60" r="52"></circle>
+          <circle class="val" id="ring-val" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="label">
+          <div class="pct" id="score-pct">0<small>%</small></div>
+          <div class="cap">Same-brain score</div>
+        </div>
+      </div>
+
+      <p class="headline" id="score-headline">…</p>
+      <p class="subtle">Just for fun — this score has no medical meaning.</p>
+
+      <div class="tally">
+        <div class="pill"><div class="num" id="count-a">0</div><div class="cap">Chose A</div></div>
+        <div class="pill"><div class="num" id="count-b">0</div><div class="cap">Chose B</div></div>
+      </div>
+
+      <div class="facts" id="facts" hidden>
+        <h3>Meanwhile, other people…</h3>
+        <div id="facts-list"></div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn" id="share-btn">Share my result</button>
+        <button class="btn secondary" id="share-detail-btn">Share with my answers</button>
+        <button class="btn ghost" id="restart-btn">Start again</button>
+        <p class="share-note">Sharing only includes your score and the questionnaire name — never your individual answers, unless you pick “Share with my answers”.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "do-you-do-this-too",
+  "version": "1.0.0",
+  "description": "Do You Do This Too? — a fun A/B questionnaire comparing everyday habits between friends. Not a medical or diagnostic tool.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "express": "^4.21.2"
+  },
+  "license": "MIT"
+}

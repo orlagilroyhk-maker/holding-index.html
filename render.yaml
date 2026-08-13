@@ -1,0 +1,22 @@
+# Render Blueprint — deploys this app on Render's free plan.
+# In Render: New + → Blueprint → connect this repo. Render reads this file,
+# then prompts you to fill in the three secret values below.
+#
+# See the README "Deploy it (free)" section for the full walkthrough,
+# including creating the free Turso database that DATABASE_URL points at.
+services:
+  - type: web
+    name: do-you-do-this-too
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      # Password for the /admin area — set this to something long and private.
+      - key: ADMIN_PASSWORD
+        sync: false
+      # Free Turso cloud database so responses survive restarts/redeploys.
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_AUTH_TOKEN
+        sync: false
