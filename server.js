@@ -25,18 +25,25 @@ const QUESTIONNAIRE_NAME = "Do You Do This Too?";
 
 // ---- Public API ----------------------------------------------------------
 
+// Small wrapper so async handler errors become clean 500s instead of crashes.
+const wrap = (fn) => (req, res) =>
+  Promise.resolve(fn(req, res)).catch((err) => {
+    console.error(err);
+    if (!res.headersSent) res.status(500).json({ error: "Something went wrong" });
+  });
+
 // Questions for the quiz — never includes the creator's answers.
-app.get("/api/questions", (req, res) => {
-  res.json({ name: QUESTIONNAIRE_NAME, questions: store.getPublicQuestions() });
-});
+app.get("/api/questions", wrap(async (req, res) => {
+  res.json({ name: QUESTIONNAIRE_NAME, questions: await store.getPublicQuestions() });
+}));
 
 // Anonymous aggregate stats (per-question A/B percentages).
-app.get("/api/aggregates", (req, res) => {
-  res.json({ aggregates: store.getAggregates() });
-});
+app.get("/api/aggregates", wrap(async (req, res) => {
+  res.json({ aggregates: await store.getAggregates() });
+}));
 
 // Submit a completed questionnaire. Scoring happens here, server-side.
-app.post("/api/responses", (req, res) => {
+app.post("/api/responses", wrap(async (req, res) => {
   const body = req.body || {};
   const responseId = typeof body.responseId === "string" ? body.responseId.slice(0, 64) : "";
   const rawAnswers = body.answers && typeof body.answers === "object" ? body.answers : {};
@@ -49,11 +56,11 @@ app.post("/api/responses", (req, res) => {
     if (val === "A" || val === "B") answers[String(qid)] = val;
   }
 
-  const questions = store.getEnabledQuestions();
+  const questions = await store.getEnabledQuestions();
   const { matches, total, sameBrainPercent } = score(answers, questions);
   const completedAt = new Date().toISOString();
 
-  const stored = store.saveResponse({ responseId, answers, matches, total, sameBrainPercent, completedAt });
+  const stored = await store.saveResponse({ responseId, answers, matches, total, sameBrainPercent, completedAt });
 
   res.json({
     name: QUESTIONNAIRE_NAME,
@@ -61,9 +68,9 @@ app.post("/api/responses", (req, res) => {
     matches,
     total,
     sameBrainPercent,
-    aggregates: store.getAggregates(),
+    aggregates: await store.getAggregates(),
   });
-});
+}));
 
 // ---- Admin (HTTP Basic Auth) ---------------------------------------------
 
@@ -83,36 +90,36 @@ function requireAdmin(req, res, next) {
   res.status(401).json({ error: "Authentication required" });
 }
 
-app.get("/api/admin/stats", requireAdmin, (req, res) => {
-  res.json({ ...store.getStats(), questions: store.getAggregates() });
-});
+app.get("/api/admin/stats", requireAdmin, wrap(async (req, res) => {
+  const [stats, questions] = await Promise.all([store.getStats(), store.getAggregates()]);
+  res.json({ ...stats, questions });
+}));
 
-app.get("/api/admin/questions", requireAdmin, (req, res) => {
-  res.json({ questions: store.getAllQuestions() });
-});
+app.get("/api/admin/questions", requireAdmin, wrap(async (req, res) => {
+  res.json({ questions: await store.getAllQuestions() });
+}));
 
-app.post("/api/admin/questions", requireAdmin, (req, res) => {
+app.post("/api/admin/questions", requireAdmin, wrap(async (req, res) => {
   const q = req.body || {};
   if (!q.id || !q.title) return res.status(400).json({ error: "id and title are required" });
-  res.json({ question: store.upsertQuestion(q) });
-});
+  res.json({ question: await store.upsertQuestion(q) });
+}));
 
-app.put("/api/admin/questions/:id", requireAdmin, (req, res) => {
+app.put("/api/admin/questions/:id", requireAdmin, wrap(async (req, res) => {
   const q = { ...(req.body || {}), id: req.params.id };
   if (!q.title) return res.status(400).json({ error: "title is required" });
-  res.json({ question: store.upsertQuestion(q) });
-});
+  res.json({ question: await store.upsertQuestion(q) });
+}));
 
-app.delete("/api/admin/questions/:id", requireAdmin, (req, res) => {
-  const ok = store.deleteQuestion(req.params.id);
-  res.json({ deleted: ok });
-});
+app.delete("/api/admin/questions/:id", requireAdmin, wrap(async (req, res) => {
+  res.json({ deleted: await store.deleteQuestion(req.params.id) });
+}));
 
-app.post("/api/admin/reorder", requireAdmin, (req, res) => {
+app.post("/api/admin/reorder", requireAdmin, wrap(async (req, res) => {
   const ids = Array.isArray(req.body?.order) ? req.body.order.map(String) : [];
-  store.reorderQuestions(ids);
+  await store.reorderQuestions(ids);
   res.json({ ok: true });
-});
+}));
 
 // Protect the admin HTML page itself with the same auth.
 app.get(["/admin", "/admin.html"], requireAdmin, (req, res) => {
@@ -125,12 +132,19 @@ app.use(express.static(PUBLIC_DIR, { extensions: ["html"] }));
 
 app.get("/", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "index.html")));
 
-app.listen(PORT, () => {
-  console.log(`\n  ${QUESTIONNAIRE_NAME}`);
-  console.log(`  Running at http://localhost:${PORT}`);
-  console.log(`  Admin at   http://localhost:${PORT}/admin`);
-  if (!ADMIN_PASSWORD) console.log("  ⚠  ADMIN_PASSWORD not set — /admin is disabled until you set it.\n");
-  else console.log("");
+store.initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`\n  ${QUESTIONNAIRE_NAME}`);
+    console.log(`  Running at http://localhost:${PORT}`);
+    console.log(`  Admin at   http://localhost:${PORT}/admin`);
+    const usingCloud = !!process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("libsql");
+    console.log(`  Database:  ${usingCloud ? "Turso (cloud)" : "local file"}`);
+    if (!ADMIN_PASSWORD) console.log("  ⚠  ADMIN_PASSWORD not set — /admin is disabled until you set it.\n");
+    else console.log("");
+  });
+}).catch((err) => {
+  console.error("Failed to initialise the database:", err);
+  process.exit(1);
 });
 
 // ---- Tiny .env loader (no dependency) ------------------------------------

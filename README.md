@@ -27,7 +27,9 @@ storage independently.
 ## Tech
 
 - **Node.js + Express** — one small server, no framework on the front end.
-- **SQLite** (via `better-sqlite3`) — a single file on disk, zero external services.
+- **libSQL / SQLite** (via `@libsql/client`) — a single local file in development,
+  and a free [Turso](https://turso.tech) cloud database in production. Same code
+  either way; you switch by setting environment variables.
 - **Vanilla HTML/CSS/JS** front end — no build step.
 
 ---
@@ -108,12 +110,20 @@ video or add a transcript in the question text.
 
 ## Configure the database
 
-By default the SQLite file lives at `data/responses.db`. To change it, set `DB_PATH`
-(absolute or relative to the project root) in `.env` or your host’s environment:
+The app talks to one database interface (libSQL) in two modes:
 
-```
-DB_PATH=/var/data/dydtt.db
-```
+- **Local development (default):** a SQLite file at `data/responses.db`. Nothing to
+  configure. To change the location, set `DB_PATH` (relative to the project root):
+  ```
+  DB_PATH=./data/responses.db
+  ```
+- **Production:** a free **Turso** cloud database, so your data survives restarts and
+  redeploys. Set two environment variables (leave `DB_PATH` unused):
+  ```
+  DATABASE_URL=libsql://your-db-name-you.turso.io
+  DATABASE_AUTH_TOKEN=your-turso-auth-token
+  ```
+  Getting these takes about two minutes — see **Deploy it (free)** below.
 
 The database stores, per response: a **random anonymous response ID**, the A/B
 answers, the completion timestamp, and the same-brain percentage. No names, emails,
@@ -145,22 +155,59 @@ Go to `/admin` and sign in. You’ll see:
 
 ---
 
-## Deploy it
+## Deploy it (free)
 
-It’s a standard Node web app; any host that runs Node works. General steps:
+This deploys for **free** and keeps your collected responses safe, using two free
+services: **Turso** (the cloud database) and **Render** (runs the app). No credit
+card required. Total time: about 10 minutes.
 
-1. Push this repo to your host (or connect it to GitHub).
-2. Set environment variables: `ADMIN_PASSWORD` (and optionally `ADMIN_USER`,
-   `PORT`, `DB_PATH`).
-3. Build/start command: `npm install` then `npm start`.
-4. Make sure the SQLite file lives on **persistent** storage. On hosts with an
-   ephemeral filesystem, attach a persistent disk/volume and point `DB_PATH` at it,
-   otherwise stored responses reset on redeploy.
+### Step 1 — Create the free database (Turso)
 
-Good low-cost fits: a small VPS, [Render](https://render.com),
-[Railway](https://railway.app), or [Fly.io](https://fly.io) (each supports a
-persistent volume for the database). A serverless/static-only host is not ideal here
-because of the SQLite file and admin API.
+1. Sign up at <https://turso.tech> (free “Starter” plan).
+2. Install the CLI and create a database. On Mac/Linux:
+   ```bash
+   curl -sSfL https://get.tur.so/install.sh | bash
+   turso auth login
+   turso db create do-you-do-this-too
+   ```
+   (No terminal? You can also create the database from the Turso web dashboard.)
+3. Get the two values you’ll need:
+   ```bash
+   turso db show do-you-do-this-too --url          # → DATABASE_URL  (libsql://…)
+   turso db tokens create do-you-do-this-too       # → DATABASE_AUTH_TOKEN
+   ```
+   Keep these two strings handy for the next step.
+
+### Step 2 — Deploy the app (Render)
+
+1. Push this repo to your own GitHub account (or fork it).
+2. Sign up at <https://render.com> (free plan) and click **New + → Blueprint**.
+3. Connect this repository. Render reads the included `render.yaml` and creates the
+   web service automatically.
+4. When prompted, fill in the three environment variables:
+   - `ADMIN_PASSWORD` — a long, private password for your `/admin` area.
+   - `DATABASE_URL` — the `libsql://…` URL from Step 1.
+   - `DATABASE_AUTH_TOKEN` — the token from Step 1.
+5. Click **Apply / Deploy**. When it finishes, Render gives you a public URL like
+   `https://do-you-do-this-too.onrender.com`. Share that link — the admin dashboard
+   is at `…/admin`.
+
+That’s it. Your questions and everyone’s responses live in Turso, so they’re never
+lost when the app restarts.
+
+> **Free-plan note:** Render’s free web service “sleeps” after ~15 minutes of no
+> traffic, so the very first visit after a quiet spell can take ~30–50 seconds to
+> wake up. Your data is unaffected (it’s in Turso). If you later want it always-on
+> and instant, upgrading Render to a paid instance is the only change needed — no
+> code changes.
+
+### Deploying somewhere else
+
+It’s a standard Node app (`npm install`, then `npm start`, reads `PORT` from the
+environment), so [Railway](https://railway.app), [Fly.io](https://fly.io) or a small
+VPS work too. Just set `ADMIN_PASSWORD`, `DATABASE_URL` and `DATABASE_AUTH_TOKEN`
+(and optionally `ADMIN_USER`). You can point `DATABASE_URL` at the same Turso
+database from any host.
 
 ---
 
