@@ -37,8 +37,9 @@ function getResponseId() {
 
 // ---- Media rendering (optional, safe) ------------------------------------
 function safeUrl(url) {
+  if (!url || !String(url).trim()) return ""; // no media set
   try {
-    const u = new URL(url, window.location.origin);
+    const u = new URL(String(url).trim(), window.location.origin);
     return u.protocol === "http:" || u.protocol === "https:" ? u.href : "";
   } catch {
     return "";
